@@ -10,16 +10,12 @@ def writePPM():
     width = 256
     height = 256
 
-    lower_left = Vec3(-2.0,-1.0,-1.0)
+    lower_left = Vec3(-2.0,-2.0,-2.0)
     horizontal = Vec3(4.0,0.0,0.0)
-    vertical = Vec3(0.0,2.0,0.0)
+    vertical = Vec3(0.0,4.0,0.0)
     origin = Vec3(0.0,0.0,0.0)
 
-    def color(r):
-        unit_dir = r.direction().normalize()
-        t = 0.5*(unit_dir.y()+1.0)
-        return Vec3(1.0, 1.0, 1.0).Scale(1.0 - t).Add(Vec3(0.5,0.7,1.0).Scale(t))
-
+    
     with open('result.ppm', 'w') as f:
         f.write("P3\n" + str(width) + " " + str(height) + "\n255\n")
         index = 0
@@ -44,6 +40,30 @@ def ppm2jpg(ppm_path):
     cv2.imshow("output",output)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
+
+# ray: p = A + t*B
+# sphere: C(x,y,z)
+# (B*B)t^2 + 2B(A-C)t + (A^2 - C^2 - R^2) = 0
+# delta = b^2 - 4ac
+def hitSphere(center, radius, ray):
+    oc = ray.origin().Sub(center) # oc = A-C
+    a = ray.direction().dot(ray.direction()) # a = B dot B
+    b = 2.0 * oc.dot(ray.direction()) # b = 2B dot oc
+    c = oc.dot(oc) - radius**2 # c = oc^2 - R^2
+    discriminant = b**2 - 4*a*c
+    if discriminant < 0:
+        return False
+    else:
+        return True
+
+def color(r):
+    if hitSphere(Vec3(0,0,-1), 0.5, r):
+        return Vec3(0,0,1)
+    else:
+        unit_dir = r.direction().normalize()
+        t = 0.5*(unit_dir.y()+1.0)
+        return Vec3(1.0, 1.0, 1.0).Scale(1.0 - t).Add(Vec3(0.5,0.7,1.0).Scale(t))
+
 
 
 
