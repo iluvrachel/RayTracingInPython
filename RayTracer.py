@@ -2,6 +2,7 @@
 from PIL import Image
 import cv2
 from tqdm import tqdm
+import math
 
 from Vec3 import Vec3
 from Ray import Ray
@@ -52,13 +53,15 @@ def hitSphere(center, radius, ray):
     c = oc.dot(oc) - radius**2 # c = oc^2 - R^2
     discriminant = b**2 - 4*a*c
     if discriminant < 0:
-        return False
+        return -1.0
     else:
-        return True
+        return (-b - float(math.sqrt(discriminant)) / (2.0*a)) # t
 
 def color(r):
-    if hitSphere(Vec3(0,0,-1), 0.5, r):
-        return Vec3(0,0,1)
+    t = hitSphere(Vec3(0,0,-1), 0.5, r)
+    if t > 0:
+        N = r.point_at_parameter(t).Sub(Vec3(0,0,-1)).normalize()
+        return Vec3(N.x()+1, N.y()+1, N.z()+1).Scale(0.5)
     else:
         unit_dir = r.direction().normalize()
         t = 0.5*(unit_dir.y()+1.0)
