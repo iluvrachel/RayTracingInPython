@@ -6,6 +6,7 @@ import math
 
 from Vec3 import Vec3
 from Ray import Ray
+from Hit import Hitable, HitRecord, Sphere, Hitable_list
 
 def writePPM():
     width = 256
@@ -26,7 +27,8 @@ def writePPM():
                     u = float(i)/float(width)
                     v = float(j)/float(height)
                     ray = Ray(origin, lower_left.Add(horizontal.Scale(u)).Add(vertical.Scale(v)))
-                    col = color(ray)
+                    world = create_scene()
+                    col = color(ray, world)
                     index += 1
                     ir = int(255.59*col.x())
                     ig = int(255.59*col.y())
@@ -41,7 +43,7 @@ def ppm2jpg(ppm_path):
     cv2.imshow("output",output)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
-
+'''
 # ray: p = A + t*B
 # sphere: C(x,y,z)
 # (B*B)t^2 + 2B(A-C)t + (A^2 - C^2 - R^2) = 0
@@ -56,12 +58,20 @@ def hitSphere(center, radius, ray):
         return -1.0
     else:
         return (-b - float(math.sqrt(discriminant)) / (2.0*a)) # t
+'''
+def create_scene():
+    obj_list = []
+    obj_list.append(Sphere(Vec3(0.0,0.0,-1.0),0.5))
+    obj_list.append(Sphere(Vec3(0.3,0.0,-1.0),0.5))
+    obj_list.append(Sphere(Vec3(0.0,-100.5,-1.0),100.0))
+    world = Hitable_list(obj_list)
+    return world
 
-def color(r):
-    t = hitSphere(Vec3(0,0,-1), 0.5, r)
-    if t > 0:
-        N = r.point_at_parameter(t).Sub(Vec3(0,0,-1)).normalize()
-        return Vec3(N.x()+1, N.y()+1, N.z()+1).Scale(0.5)
+def color(r,world):
+    rec = HitRecord()
+    if world.hit(r,0,float('inf'),rec):
+        # paint according to normal value
+        return Vec3(rec.normal.x()+1, rec.normal.y()+1, rec.normal.z()+1).Scale(0.5)
     else:
         unit_dir = r.direction().normalize()
         t = 0.5*(unit_dir.y()+1.0)
