@@ -3,14 +3,17 @@ from PIL import Image
 import cv2
 from tqdm import tqdm
 import math
+import random
 
 from Vec3 import Vec3
 from Ray import Ray
 from Hit import Hitable, HitRecord, Sphere, Hitable_list
+from Camera import Camera
 
 def writePPM():
     width = 256
     height = 256
+    ns = 100 # smaple nums
 
     lower_left = Vec3(-2.0,-2.0,-2.0)
     horizontal = Vec3(4.0,0.0,0.0)
@@ -21,14 +24,18 @@ def writePPM():
     with open('result.ppm', 'w') as f:
         f.write("P3\n" + str(width) + " " + str(height) + "\n255\n")
         index = 0
+        world = create_scene()
+        camera = Camera()
         with tqdm(total=256) as pbar:
             for j in range(height-1,-1,-1):
                 for i in range(0,width):
-                    u = float(i)/float(width)
-                    v = float(j)/float(height)
-                    ray = Ray(origin, lower_left.Add(horizontal.Scale(u)).Add(vertical.Scale(v)))
-                    world = create_scene()
-                    col = color(ray, world)
+                    col = Vec3(0,0,0)
+                    for s in range(0,ns):
+                        u = float(i+random.random())/float(width) # antialiasing
+                        v = float(j+random.random())/float(height)
+                        ray = camera.GetRay(u,v)
+                        col = col.Add(color(ray,world))
+                    col = col.Scale(1.0/float(ns)) # average color
                     index += 1
                     ir = int(255.59*col.x())
                     ig = int(255.59*col.y())
