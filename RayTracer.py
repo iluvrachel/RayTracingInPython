@@ -36,6 +36,8 @@ def writePPM():
                         ray = camera.GetRay(u,v)
                         col = col.Add(color(ray,world))
                     col = col.Scale(1.0/float(ns)) # average color
+                    # gamma
+                    col = Vec3(math.sqrt(col.x()),math.sqrt(col.y()),math.sqrt(col.z()))
                     index += 1
                     ir = int(255.59*col.x())
                     ig = int(255.59*col.y())
