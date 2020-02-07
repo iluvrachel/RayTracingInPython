@@ -66,6 +66,14 @@ def hitSphere(center, radius, ray):
     else:
         return (-b - float(math.sqrt(discriminant)) / (2.0*a)) # t
 '''
+def random_in_unit_sphere():
+    while True:
+        p = Vec3(float(random.random()),float(random.random()),float(random.random())).Scale(2.0).Sub(Vec3(1.0,1.0,1.0))
+        if p.dot(p) >= 1.0:
+            pass
+        else:
+            return p 
+
 def create_scene():
     obj_list = []
     obj_list.append(Sphere(Vec3(0.0,0.0,-1.0),0.5))
@@ -77,8 +85,11 @@ def create_scene():
 def color(r,world):
     rec = HitRecord()
     if world.hit(r,0,float('inf'),rec):
+        # ray reflect target
+        target = rec.p.Add(rec.normal).Add(random_in_unit_sphere())
         # paint according to normal value
-        return Vec3(rec.normal.x()+1, rec.normal.y()+1, rec.normal.z()+1).Scale(0.5)
+        # decay 50% every reflect
+        return color(Ray(rec.p, target.Sub(rec.p)), world).Scale(0.5)
     else:
         unit_dir = r.direction().normalize()
         t = 0.5*(unit_dir.y()+1.0)
