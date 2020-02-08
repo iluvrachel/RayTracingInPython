@@ -9,6 +9,7 @@ from Vec3 import Vec3
 from Ray import Ray
 from Hit import Hitable, HitRecord, Sphere, Hitable_list
 from Camera import Camera
+from Material import Metal, Lambertian, Wrapper
 
 def writePPM():
     width = 256
@@ -34,10 +35,10 @@ def writePPM():
                         u = float(i+random.random())/float(width) # antialiasing
                         v = float(j+random.random())/float(height)
                         ray = camera.GetRay(u,v)
-                        col = col.Add(color(ray,world))
+                        col = col.Add(color(ray,world,0))
                     col = col.Scale(1.0/float(ns)) # average color
                     # gamma
-                    col = Vec3(math.sqrt(col.x()),math.sqrt(col.y()),math.sqrt(col.z()))
+                    col = Vec3(float(math.sqrt(col.x())),float(math.sqrt(col.y())),float(math.sqrt(col.z())))
                     index += 1
                     ir = int(255.59*col.x())
                     ig = int(255.59*col.y())
@@ -68,30 +69,33 @@ def hitSphere(center, radius, ray):
     else:
         return (-b - float(math.sqrt(discriminant)) / (2.0*a)) # t
 '''
-def random_in_unit_sphere():
-    while True:
-        p = Vec3(float(random.random()),float(random.random()),float(random.random())).Scale(2.0).Sub(Vec3(1.0,1.0,1.0))
-        if p.dot(p) >= 1.0:
-            pass
-        else:
-            return p 
 
 def create_scene():
     obj_list = []
-    obj_list.append(Sphere(Vec3(0.0,0.0,-1.0),0.5))
-    obj_list.append(Sphere(Vec3(0.3,0.0,-1.0),0.5))
-    obj_list.append(Sphere(Vec3(0.0,-100.5,-1.0),100.0))
+    obj_list.append(Sphere(Vec3(0.0,0.0,-1.0),0.5, Lambertian(Vec3(0.8,0.3,0.2))))
+    # obj_list.append(Sphere(Vec3(0.3,0.0,-1.0),0.5,Metal(Vec3(0.8,0.6,0.2), 0.1)))
+    obj_list.append(Sphere(Vec3(0.0,-100.5,-1.0),100.0,Metal(Vec3(0.8,0.6,0.2), 0.1)))
     world = Hitable_list(obj_list)
     return world
 
-def color(r,world):
+def color(r,world,depth):
+    '''
+    @param {ray, hitable_list, recursion_depth} 
+    @return: 
+    '''
     rec = HitRecord()
     if world.hit(r,0,float('inf'),rec):
         # ray reflect target
-        target = rec.p.Add(rec.normal).Add(random_in_unit_sphere())
+        wrapper = Wrapper()
+        # target = rec.p.Add(rec.normal).Add(random_in_unit_sphere())
+        
         # paint according to normal value
         # decay 50% every reflect
-        return color(Ray(rec.p, target.Sub(rec.p)), world).Scale(0.5)
+        if depth < 50 and rec.mat_ptr.scatter(r, rec, wrapper):
+            return wrapper.attenuation.Mul(color(wrapper.scattered, world, depth+1))
+            #return color(Ray(rec.p, target.Sub(rec.p)), world, depth+1).Scale(0.5)
+        else:
+            return Vec3(0.0,0.0,0.0)
     else:
         unit_dir = r.direction().normalize()
         t = 0.5*(unit_dir.y()+1.0)

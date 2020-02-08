@@ -25,6 +25,9 @@ class Vec3():
     def Sub(self,v):
         return Vec3(self.e[0]-v.e[0],self.e[1]-v.e[1],self.e[2]-v.e[2])
 
+    def Mul(self, v):
+        return Vec3(self.e[0]*v.e[0], self.e[1]*v.e[1], self.e[2]*v.e[2])
+        
     def Scale(self,t):
         return Vec3(self.e[0]*t, self.e[1]*t, self.e[2]*t)
 

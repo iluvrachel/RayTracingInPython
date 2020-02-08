@@ -13,21 +13,23 @@ class Hitable():
 class HitRecord():
     def __init__(self):
         '''
-        @param {t: hit time, p: hit position, normal: hit point normal} 
+        @param {t: hit time, p: hit position, normal: hit point normal, mat_ptr: material} 
         @return: None
         '''        
         self.t = 0
         self.p = Vec3(0.0, 0.0, 0.0)
         self.normal = Vec3(0.0, 0.0, 0.0)
+        self.mat_ptr = None
 
 class Sphere(Hitable):
-    def __init__(self, center, radius):
+    def __init__(self, center, radius, mat):
         '''
         @param {Vec3 center, float radius} 
         @return: 
         '''
         self.center = center
         self.radius = radius
+        self.material = mat
 
     def hit(self, r, t_min, t_max, rec):
         '''
@@ -49,12 +51,14 @@ class Sphere(Hitable):
                 rec.t = temp
                 rec.p = r.point_at_parameter(rec.t)
                 rec.normal = (rec.p.Sub(self.center)).Scale(1.0/self.radius)
+                rec.mat_ptr = self.material
                 return True
             temp = (-b + discFactor) / (2.0*a) # 较大的根
             if temp < t_max and temp > t_min:
                 rec.t = temp
                 rec.p = r.point_at_parameter(rec.t)
                 rec.normal = (rec.p.Sub(self.center)).Scale(1.0/self.radius)
+                rec.mat_ptr = self.material
                 return True
         return False
 
@@ -73,6 +77,7 @@ class Hitable_list(Hitable):
                 rec.t = temp_rec.t
                 rec.normal = temp_rec.normal
                 rec.p = temp_rec.p
+                rec.mat_ptr = temp_rec.mat_ptr
         return hit_anything
 
 
