@@ -9,7 +9,7 @@ from Vec3 import Vec3
 from Ray import Ray
 from Hit import Hitable, HitRecord, Sphere, Hitable_list
 from Camera import Camera
-from Material import Metal, Lambertian, Wrapper
+from Material import Metal, Lambertian, Deilectric, Wrapper
 
 def writePPM():
     width = 256
@@ -73,7 +73,7 @@ def hitSphere(center, radius, ray):
 def create_scene():
     obj_list = []
     obj_list.append(Sphere(Vec3(0.0,0.0,-1.0),0.5, Lambertian(Vec3(0.8,0.3,0.2))))
-    # obj_list.append(Sphere(Vec3(0.3,0.0,-1.0),0.5,Metal(Vec3(0.8,0.6,0.2), 0.1)))
+    obj_list.append(Sphere(Vec3(-1.0,0.0,-1.0),0.5,Deilectric(1.0)))
     obj_list.append(Sphere(Vec3(0.0,-100.5,-1.0),100.0,Metal(Vec3(0.8,0.6,0.2), 0.1)))
     world = Hitable_list(obj_list)
     return world
