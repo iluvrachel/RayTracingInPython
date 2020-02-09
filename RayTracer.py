@@ -12,8 +12,8 @@ from Camera import Camera
 from Material import Metal, Lambertian, Deilectric, Wrapper
 
 def writePPM():
-    width = 256
-    height = 256
+    width = 400
+    height = 200
     ns = 100 # smaple nums
 
     lower_left = Vec3(-2.0,-2.0,-2.0)
@@ -26,8 +26,8 @@ def writePPM():
         f.write("P3\n" + str(width) + " " + str(height) + "\n255\n")
         index = 0
         world = create_scene()
-        camera = Camera()
-        with tqdm(total=256) as pbar:
+        camera = Camera(Vec3(-2.0,2.0,1.0), Vec3(0.0,0.0,-1.0), Vec3(0.0,1.0,0.0), 40.0, float(width)/float(height))
+        with tqdm(total=height) as pbar:
             for j in range(height-1,-1,-1):
                 for i in range(0,width):
                     col = Vec3(0,0,0)
@@ -72,9 +72,13 @@ def hitSphere(center, radius, ray):
 
 def create_scene():
     obj_list = []
-    obj_list.append(Sphere(Vec3(0.0,0.0,-1.0),0.5, Lambertian(Vec3(0.8,0.3,0.2))))
-    obj_list.append(Sphere(Vec3(-1.0,0.0,-1.0),0.5,Deilectric(1.0)))
-    obj_list.append(Sphere(Vec3(0.0,-100.5,-1.0),100.0,Metal(Vec3(0.8,0.6,0.2), 0.1)))
+    obj_list.append(Sphere(Vec3(0.0,0.0,-1.0),0.5, Lambertian(Vec3(0.1,0.2,0.5))))
+    obj_list.append(Sphere(Vec3(-1.0,0.0,-1.0),0.5,Deilectric(1.5)))
+    obj_list.append(Sphere(Vec3(1.0,0.0,-1.0),0.5,Metal(Vec3(0.8,0.6,0.2),0.2)))
+
+
+    # Ground
+    obj_list.append(Sphere(Vec3(0.0,-100.5,-1.0),100.0,Lambertian(Vec3(0.5,0.5,0.5))))
     world = Hitable_list(obj_list)
     return world
 
