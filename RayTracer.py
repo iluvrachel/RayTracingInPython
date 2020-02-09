@@ -1,5 +1,4 @@
 #ppm2jpg
-from PIL import Image
 import cv2
 from tqdm import tqdm
 import math
